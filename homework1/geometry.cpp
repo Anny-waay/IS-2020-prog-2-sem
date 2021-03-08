@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cassert>
 #include <math.h>
+#define PI 3.1415926535
 
 Point::Point(int x, int y)
 	: x_(x)
@@ -38,19 +39,20 @@ PolygonalChain:: PolygonalChain(const PolygonalChain& other){
 PolygonalChain& PolygonalChain:: operator=(const PolygonalChain& other) {
 	if (&other == this)
 		return *this;
-	//todo differents sizes?..
+	//fixed differents sizes?..
+	if (other.N_ > N_)
+		N_ = other.N_;
 	for (int i = 0; i < N_; i++)
 		points_[i] = other.points_[i];
-	N_ = other.N_;
 
 	return *this;
 }
 double PolygonalChain:: perimeter() const {
-	//todo no capital letters for vars
-	double P = 0;
+	//fixed no capital letters for vars
+	double per = 0;
 	for (int i = 0; i < getN()-1; i++)
-		P += sqrt(pow(getPoint(i).getX()- getPoint(i+1).getX(), 2)+ pow(getPoint(i).getY() - getPoint(i + 1).getY(), 2));
-	return P;
+		per += sqrt(pow(getPoint(i).getX()- getPoint(i+1).getX(), 2)+ pow(getPoint(i).getY() - getPoint(i + 1).getY(), 2));
+	return per;
 }
 
 ClosedPolygonalChain::ClosedPolygonalChain(int N, Point* points)
@@ -64,55 +66,33 @@ ClosedPolygonalChain& ClosedPolygonalChain:: operator=(const ClosedPolygonalChai
 	return *this;
 }
 double ClosedPolygonalChain::perimeter() const {
-	//todo use perimeter from base class
-	double P = 0;
-	for (int i = 0; i < getN() - 1; i++)
-		P += sqrt(pow(getPoint(i).getX() - getPoint(i + 1).getX(), 2) + pow(getPoint(i).getY() - getPoint(i + 1).getY(), 2));
-	P += sqrt(pow(getPoint(getN() - 1).getX() - getPoint(0).getX(), 2) + pow(getPoint(getN() - 1).getY() - getPoint(0).getY(), 2));
-	return P;
+	//fixed use perimeter from base class
+	double per = PolygonalChain:: perimeter();
+	per += sqrt(pow(getPoint(getN() - 1).getX() - getPoint(0).getX(), 2) + pow(getPoint(getN() - 1).getY() - getPoint(0).getY(), 2));
+	return per;
 }
 
-//todo constructor from base class
-Polygon::Polygon(int N, Point* points) {
-	N_ = N;
-	points_ = new Point[N];
-	for (int i = 0; i < N; i++)
-		points_[i] = points[i];
-}
-Polygon::Polygon(const Polygon& other) {
-	N_ = other.N_;
-	points_ = new Point[N_];
-	for (int i = 0; i < N_; i++)
-		points_[i] = other.points_[i];
-}
-//todo = from base class
+//fixed constructor from base class
+Polygon::Polygon(int N, Point* points) 
+	:ClosedPolygonalChain(N, points)
+{}
+Polygon::Polygon(const Polygon& other) 
+	:ClosedPolygonalChain(other)
+{}
+//fixed = from base class
 Polygon& Polygon:: operator=(const Polygon& other) {
-	if (&other == this)
-		return *this;
-
-	for (int i = 0; i < N_; i++)
-		points_[i] = other.points_[i];
-	N_ = other.N_;
-
+	ClosedPolygonalChain:: operator=(other);
 	return *this;
 }
-double Polygon::perimeter() const {
-	//todo perimeter from base class, u dont need it here
-	double P = 0;
-	for (int i = 0; i < N_ - 1; i++)
-		P += sqrt(pow(getPoint(i).getX() - getPoint(i + 1).getX(), 2) + pow(getPoint(i).getY() - getPoint(i + 1).getY(), 2));
-	P += sqrt(pow(getPoint(N_ - 1).getX() - getPoint(0).getX(), 2) + pow(getPoint(N_ - 1).getY() - getPoint(0).getY(), 2));
-	return P;
-}
+//fixed perimeter from base class, u dont need it here
 double Polygon::area() const {
-	int S = 0;
-	for (int i = 0; i < N_ - 1; i++) {
-		S += getPoint(i).getX() * getPoint(i + 1).getY() - getPoint(i + 1).getX() * getPoint(i).getY();
+	int sum = 0;
+	for (int i = 0; i < getN() - 1; i++) {
+		sum += getPoint(i).getX() * getPoint(i + 1).getY() - getPoint(i + 1).getX() * getPoint(i).getY();
 	}
-	//todo weird
-	S = 0.5 * (abs(S + (getPoint(N_ - 1).getX() * getPoint(0).getY()) - (getPoint(0).getX() * getPoint(N_ - 1).getY())));
-	double A = (double)S;
-	return A;
+	//fixed weird
+	sum += getPoint(getN() - 1).getX() * getPoint(0).getY() - getPoint(0).getX() * getPoint(getN() - 1).getY();
+	return 0.5 * abs(sum);
 }
 
 Triangle::Triangle(int N, Point* points) 
@@ -156,7 +136,7 @@ double Trapezoid::height() const {
 	double H = (2 * area()) / ((sqrt(pow(getPoint(1).getX() - getPoint(2).getX(), 2) + pow(getPoint(1).getY() - getPoint(2).getY(), 2))) + (sqrt(pow(getPoint(3).getX() - getPoint(0).getX(), 2) + pow(getPoint(3).getY() - getPoint(0).getY(), 2))));
 	return H;
 }
-//todo area and perimeter for regular polygon
+
 RegularPolygon::RegularPolygon(int N, Point* points)
 	: Polygon(N, points)
 {}
@@ -167,4 +147,14 @@ RegularPolygon& RegularPolygon:: operator=(const RegularPolygon& other) {
 	Polygon:: operator=(other);
 	return *this;
 }
-
+//fixed area and perimeter for regular polygon
+double RegularPolygon::perimeter() const {
+	double side = sqrt(pow(getPoint(0).getX() - getPoint(1).getX(), 2) + pow(getPoint(0).getY() - getPoint(1).getY(), 2));
+	return getN() * side;
+}
+double RegularPolygon::area() const {
+	int side = pow(getPoint(0).getX() - getPoint(1).getX(), 2) + pow(getPoint(0).getY() - getPoint(1).getY(), 2);
+	int numerator = getN() * side;
+	double area = numerator / (4 * tan(PI / getN()));
+	return area;
+}
