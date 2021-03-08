@@ -32,18 +32,12 @@ public:
 	double perimeter() const override;
 };
 
-class Polygon {
-private:
-	Point * points_;
-	int N_;
+class Polygon : public ClosedPolygonalChain{
 public:
 	Polygon(int N, Point* points);
 	Polygon(const Polygon& other);
 	Polygon& operator=(const Polygon& other);
-	int getN() const { return N_; }
-	Point getPoint(int num) const { return  points_[num]; }
-	double perimeter() const;
-	double area() const;
+	virtual double area() const;
 };
 
 class Triangle : public Polygon {
@@ -67,4 +61,6 @@ public:
 	RegularPolygon(int N, Point* points);
 	RegularPolygon(const RegularPolygon& other);
 	RegularPolygon& operator=(const RegularPolygon& other);
+	double perimeter() const override;
+	double area() const override;
 };
