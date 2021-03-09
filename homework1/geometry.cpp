@@ -47,6 +47,10 @@ PolygonalChain& PolygonalChain:: operator=(const PolygonalChain& other) {
 
 	return *this;
 }
+PolygonalChain:: ~PolygonalChain() {
+	delete[] points_;
+	points_ = nullptr;
+}
 double PolygonalChain:: perimeter() const {
 	//fixed no capital letters for vars
 	double per = 0;
