@@ -19,6 +19,7 @@ public:
 	PolygonalChain(int N, Point* points);
 	PolygonalChain(const PolygonalChain& other);
 	PolygonalChain& operator=(const PolygonalChain& other);
+	~PolygonalChain();
 	int getN() const { return N_; }
 	Point getPoint(int num) const { return  points_[num]; }
 	virtual double perimeter() const;
