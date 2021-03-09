@@ -40,7 +40,9 @@ PolygonalChain& PolygonalChain:: operator=(const PolygonalChain& other) {
 	if (&other == this)
 		return *this;
 	//fixed differents sizes?..
+	delete[]points_;
 	N_ = other.N_;
+	points_ = new Point[N_];
 	for (int i = 0; i < N_; i++)
 		points_[i] = other.points_[i];
 
