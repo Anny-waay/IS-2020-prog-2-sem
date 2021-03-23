@@ -45,28 +45,35 @@ Polynomial& Polynomial::operator+=(const Polynomial& rhs) {
 		this->check_null();
 	}
 	else {
-		Polynomial res = Polynomial();
-		if (max_k > rhs.max_k)
-			res.max_k = max_k;
-		else
-			res.max_k = rhs.max_k;
-		if (min_k < rhs.min_k)
-			res.min_k = min_k;
-		else
-			res.min_k = rhs.min_k;
-		delete[]res.pol_;
-		res.pol_ = new int[res.max_k - res.min_k + 1];
-		for (int i = 0; i < res.max_k - res.min_k + 1; i++)
-			res.pol_[i] = 0;
-		for (int i = 0; i < res.max_k - res.min_k + 1; i++)
-			for (int j = 0; j < max_k - min_k + 1; j++)
-				if (i + res.min_k == j + min_k)
-					res.pol_[i] += pol_[j];
-		for (int i = 0; i < res.max_k - res.min_k + 1; i++)
+		if (*this == Polynomial()) {
+			*this = rhs;
+			return *this;
+		}
+		if (rhs == Polynomial())
+			return *this;
+		int temp_size = max_k - min_k + 1;
+		int min1 = min_k;
+		int* temp = new int[temp_size];
+		for (int i = 0; i < max_k - min_k + 1; i++)
+			temp[i]=pol_[i];
+		if (rhs.max_k > max_k)
+			max_k = rhs.max_k;
+		if (rhs.min_k < min_k)
+			min_k = rhs.min_k;
+		delete[]pol_;
+		pol_ = new int[max_k - min_k + 1];
+		for (int i = 0; i < max_k - min_k + 1; i++)
+			pol_[i] = 0;
+		for (int i = 0; i < max_k - min_k + 1; i++)
+			for (int j = 0; j < temp_size; j++)
+				if (i + min_k == j + min1)
+					pol_[i] += temp[j];
+		for (int i = 0; i < max_k - min_k + 1; i++)
 			for (int j = 0; j < rhs.max_k - rhs.min_k + 1; j++)
-				if (i + res.min_k == j + rhs.min_k)
-					res.pol_[i] += rhs.pol_[j];
-		*this = res.check_null();
+				if (i + min_k == j + rhs.min_k)
+					pol_[i] += rhs.pol_[j];
+		this->check_null();
+		delete[]temp;
 	}
 	return* this;
 }
@@ -81,21 +88,25 @@ Polynomial& Polynomial::operator*=(const Polynomial& rhs) {
 		*this = rhs;
 		return *this;
 	}
-	Polynomial res = Polynomial();
-	res.max_k = max_k + rhs.max_k;
-	res.min_k = min_k + rhs.min_k;
-	delete[] res.pol_;
-	res.pol_ = new int[res.max_k - res.min_k + 1];
-	for (int i = 0; i < res.max_k - res.min_k + 1; i++)
-		res.pol_[i] = 0;
-	for (int i = 0; i < max_k - min_k + 1; i++) {
+	int temp_size = max_k - min_k + 1;
+	int min1 = min_k;
+	int* temp = new int[temp_size];
+	for (int i = 0; i < temp_size; i++)
+		temp[i] = pol_[i];
+	max_k = max_k + rhs.max_k;
+	min_k = min_k + rhs.min_k;
+	delete[] pol_;
+	pol_ = new int[max_k - min_k + 1];
+	for (int i = 0; i < max_k - min_k + 1; i++)
+		pol_[i] = 0;
+	for (int i = 0; i < temp_size; i++) {
 		for (int j = 0; j < rhs.max_k - rhs.min_k + 1; j++) {
-			if (pol_[i] == 0)
+			if (temp[i] == 0)
 				break;
-			res.pol_[i + min_k + j + rhs.min_k - res.min_k] += pol_[i] * rhs.pol_[j];
+			pol_[i + min1 + j + rhs.min_k - min_k] += temp[i] * rhs.pol_[j];
 		}
 	}
-	*this = res;
+	delete[]temp;
 	return *this;
 }
 Polynomial& Polynomial::operator/=(int value) {
@@ -150,33 +161,31 @@ double Polynomial::get(int value) {
 	return res;
 }
 Polynomial Polynomial::check_null() {
-	Polynomial res(*this);
-	int i = res.max_k-res.min_k;
-	while (res.pol_[i] == 0 && i > -1) {
+	int i = max_k-min_k;
+	while (pol_[i] == 0 && i > -1) {
 		i--;
 	}
 	if (i == -1) {
-		res = Polynomial();
+		*this = Polynomial();
 	}
 	else {
-		res.max_k = i + res.min_k;
+		max_k = i + min_k;
 		int i = 0;
-		while (res.pol_[i] == 0) {
+		while (pol_[i] == 0) {
 			i++;
 		}
-		res.min_k += i;
-		int* temp = new int[res.max_k - res.min_k+1];
-		for (int j = 0; j < res.max_k - res.min_k + 1; j++) {
-			temp[j] = res.pol_[j + i];
+		min_k += i;
+		int* temp = new int[max_k - min_k+1];
+		for (int j = 0; j < max_k - min_k + 1; j++) {
+			temp[j] = pol_[j + i];
 		}
-		delete[]res.pol_;
-		res.pol_ = new int[res.max_k - res.min_k + 1];
-		for (i = 0; i < res.max_k - res.min_k + 1; i++) {
-			res.pol_[i] = temp[i];
+		delete[]pol_;
+		pol_ = new int[max_k - min_k + 1];
+		for (i = 0; i < max_k - min_k + 1; i++) {
+			pol_[i] = temp[i];
 		}
 		delete[]temp;
 	}
-	*this = res;
 	return *this;
 }
 bool operator==(const Polynomial& lhs, const Polynomial& rhs) {
