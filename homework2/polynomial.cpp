@@ -77,6 +77,7 @@ Polynomial& Polynomial::operator+=(const Polynomial& rhs) {
 	}
 	return* this;
 }
+//todo without creating new object
 Polynomial& Polynomial::operator-=(const Polynomial& rhs) {
 	*this += -rhs;
 	return *this;
@@ -110,6 +111,7 @@ Polynomial& Polynomial::operator*=(const Polynomial& rhs) {
 	return *this;
 }
 Polynomial& Polynomial::operator/=(int value) {
+//todo for_each
 	for (int i = 0; i < max_k - min_k + 1; i++)
 		pol_[i] /= value;
 	this->check_null();
@@ -152,6 +154,8 @@ int& Polynomial::operator[](int index) {
 	}
 	return pol_[index - min_k];
 }
+
+//todo get O(n)
 double Polynomial::get(int value) {
 	double res = 0;
 	for (int i = 0; i < max_k - min_k + 1;i++) {
