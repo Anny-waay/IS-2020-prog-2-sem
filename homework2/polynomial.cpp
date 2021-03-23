@@ -115,10 +115,9 @@ Polynomial& Polynomial::operator/=(int value) {
 	this->check_null();
 	return *this;
 }
-int& Polynomial::operator[](int index) const {
-	int temp = 0;
+int Polynomial::operator[](int index) const {
 	if ((index > max_k) || (index < min_k))
-		return temp;
+		return 0;
 	else
 		return pol_[index - min_k];
 }
