@@ -15,7 +15,7 @@ public:
 	Polynomial& operator*=(const Polynomial& rhs);
 	Polynomial& operator/=(int value);
 	int& operator[](int index);
-	int& operator[](int index) const;
+	int operator[](int index) const;
 	double get(int value);
 	Polynomial check_null();
 	friend bool operator==(const Polynomial& lhs, const Polynomial& rhs);
