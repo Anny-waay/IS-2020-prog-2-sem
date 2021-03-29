@@ -17,8 +17,8 @@ public:
 	int& operator[](int index);
 	int operator[](int index) const;
 	double get(int value);
-	//todo not check, no return
-	Polynomial check_null();
+	//fixed not check, no return
+	void delete_null();
 	friend bool operator==(const Polynomial& lhs, const Polynomial& rhs);
 	friend bool operator!=(const Polynomial& lhs, const Polynomial& rhs);
 	friend Polynomial operator+(const Polynomial& lhs, const Polynomial& rhs);
