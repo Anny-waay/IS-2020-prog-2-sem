@@ -3,6 +3,7 @@
 #include <sstream>
 #include <assert.h>
 #include <cmath>
+#include <algorithm>
 
 Polynomial::Polynomial(int min, int max, int* pol) {
 	max_k = max;
@@ -23,7 +24,7 @@ Polynomial::Polynomial(const Polynomial& other) {
 	pol_ = new int[max_k - min_k + 1];
 	for (int i = 0; i < max_k - min_k + 1; i++)
 		pol_[i] = other.pol_[i];
-} 
+}
 Polynomial& Polynomial::operator=(const Polynomial& other) {
 	if (&other == this)
 		return *this;
@@ -42,7 +43,7 @@ Polynomial& Polynomial::operator+=(const Polynomial& rhs) {
 	if ((max_k == rhs.max_k) && (min_k == rhs.min_k)) {
 		for (int i = 0; i < max_k - min_k + 1; i++)
 			pol_[i] += rhs.pol_[i];
-		this->check_null();
+		this->delete_null();
 	}
 	else {
 		if (*this == Polynomial()) {
@@ -55,7 +56,7 @@ Polynomial& Polynomial::operator+=(const Polynomial& rhs) {
 		int min1 = min_k;
 		int* temp = new int[temp_size];
 		for (int i = 0; i < max_k - min_k + 1; i++)
-			temp[i]=pol_[i];
+			temp[i] = pol_[i];
 		if (rhs.max_k > max_k)
 			max_k = rhs.max_k;
 		if (rhs.min_k < min_k)
@@ -72,15 +73,50 @@ Polynomial& Polynomial::operator+=(const Polynomial& rhs) {
 			for (int j = 0; j < rhs.max_k - rhs.min_k + 1; j++)
 				if (i + min_k == j + rhs.min_k)
 					pol_[i] += rhs.pol_[j];
-		this->check_null();
+		this->delete_null();
 		delete[]temp;
 	}
-	return* this;
+	return*this;
 }
-//todo without creating new object
+//fixed without creating new object
 Polynomial& Polynomial::operator-=(const Polynomial& rhs) {
-	*this += -rhs;
-	return *this;
+	if ((max_k == rhs.max_k) && (min_k == rhs.min_k)) {
+		for (int i = 0; i < max_k - min_k + 1; i++)
+			pol_[i] -= rhs.pol_[i];
+		this->delete_null();
+	}
+	else {
+		if (*this == Polynomial()) {
+			*this = rhs;
+			return *this;
+		}
+		if (rhs == Polynomial())
+			return *this;
+		int temp_size = max_k - min_k + 1;
+		int min1 = min_k;
+		int* temp = new int[temp_size];
+		for (int i = 0; i < max_k - min_k + 1; i++)
+			temp[i] = pol_[i];
+		if (rhs.max_k > max_k)
+			max_k = rhs.max_k;
+		if (rhs.min_k < min_k)
+			min_k = rhs.min_k;
+		delete[]pol_;
+		pol_ = new int[max_k - min_k + 1];
+		for (int i = 0; i < max_k - min_k + 1; i++)
+			pol_[i] = 0;
+		for (int i = 0; i < max_k - min_k + 1; i++)
+			for (int j = 0; j < temp_size; j++)
+				if (i + min_k == j + min1)
+					pol_[i] += temp[j];
+		for (int i = 0; i < max_k - min_k + 1; i++)
+			for (int j = 0; j < rhs.max_k - rhs.min_k + 1; j++)
+				if (i + min_k == j + rhs.min_k)
+					pol_[i] -= rhs.pol_[j];
+		this->delete_null();
+		delete[]temp;
+	}
+	return*this;
 }
 Polynomial& Polynomial::operator*=(const Polynomial& rhs) {
 	if (*this == Polynomial())
@@ -110,11 +146,11 @@ Polynomial& Polynomial::operator*=(const Polynomial& rhs) {
 	delete[]temp;
 	return *this;
 }
+
 Polynomial& Polynomial::operator/=(int value) {
-//todo for_each
-	for (int i = 0; i < max_k - min_k + 1; i++)
-		pol_[i] /= value;
-	this->check_null();
+	//fixed for_each
+	std::for_each(pol_, pol_ + max_k-min_k+1, [value](int& el){el/=value;});
+	this->delete_null();
 	return *this;
 }
 int Polynomial::operator[](int index) const {
@@ -125,7 +161,7 @@ int Polynomial::operator[](int index) const {
 }
 int& Polynomial::operator[](int index) {
 	if (index > max_k) {
-		int* temp = new int[max_k-min_k+1];
+		int* temp = new int[max_k - min_k + 1];
 		for (int i = 0; i < max_k - min_k + 1; i++)
 			temp[i] = pol_[i];
 		delete[] pol_;
@@ -144,9 +180,9 @@ int& Polynomial::operator[](int index) {
 			temp[i] = pol_[i];
 		delete[] pol_;
 		pol_ = new int[max_k - index + 1];
-		for (int i = 0; i < max_k-index + 1; i++)
+		for (int i = 0; i < max_k - index + 1; i++)
 			pol_[i] = 0;
-		for (int i = min_k-index, j =0; i < max_k - index + 1; i++, j++)
+		for (int i = min_k - index, j = 0; i < max_k - index + 1; i++, j++)
 			pol_[i] = temp[j];
 		delete[]temp;
 		min_k = index;
@@ -155,16 +191,18 @@ int& Polynomial::operator[](int index) {
 	return pol_[index - min_k];
 }
 
-//todo get O(n)
+//fixed get O(n)
 double Polynomial::get(int value) {
 	double res = 0;
+	double step = pow(value, min_k);
 	for (int i = 0; i < max_k - min_k + 1;i++) {
-		res += pol_[i] * pow(value, i + min_k);
+		res += pol_[i] * step;
+		step *= value;
 	}
 	return res;
 }
-Polynomial Polynomial::check_null() {
-	int i = max_k-min_k;
+void Polynomial::delete_null() {
+	int i = max_k - min_k;
 	while (pol_[i] == 0 && i > -1) {
 		i--;
 	}
@@ -178,7 +216,7 @@ Polynomial Polynomial::check_null() {
 			i++;
 		}
 		min_k += i;
-		int* temp = new int[max_k - min_k+1];
+		int* temp = new int[max_k - min_k + 1];
 		for (int j = 0; j < max_k - min_k + 1; j++) {
 			temp[j] = pol_[j + i];
 		}
@@ -189,22 +227,21 @@ Polynomial Polynomial::check_null() {
 		}
 		delete[]temp;
 	}
-	return *this;
 }
 bool operator==(const Polynomial& lhs, const Polynomial& rhs) {
 	Polynomial lhs1(lhs);
-	lhs1.check_null();
+	lhs1.delete_null();
 	Polynomial rhs1(rhs);
-	rhs1.check_null();
+	rhs1.delete_null();
 	if ((lhs1.max_k != rhs1.max_k) || (lhs1.min_k != rhs1.min_k))
 		return false;
 	else {
-		for (int i = 0; i < lhs1.max_k-lhs1.min_k+1;i++)
+		for (int i = 0; i < lhs1.max_k - lhs1.min_k + 1;i++)
 			if (lhs1.pol_[i] != rhs1.pol_[i])
 				return false;
 		return true;
 	}
-	
+
 }
 bool operator!=(const Polynomial& lhs, const Polynomial& rhs) {
 	return !operator==(lhs, rhs);
@@ -221,7 +258,9 @@ Polynomial operator-(const Polynomial& other) {
 	return res;
 }
 Polynomial operator-(const Polynomial& lhs, const Polynomial& rhs) {
-	return operator+(lhs, -rhs);
+	Polynomial res(lhs);
+	res -= rhs;
+	return res;
 }
 Polynomial operator*(const Polynomial& lhs, const Polynomial& rhs) {
 	Polynomial res(lhs);
@@ -284,9 +323,9 @@ std::ostream& operator<<(std::ostream& stream, const Polynomial& value) {
 								stream << "+";
 						}
 						else {
-							if(value.pol_[i]>0)
+							if (value.pol_[i] > 0)
 								stream << '+' << value.pol_[i];
-							else 
+							else
 								stream << value.pol_[i];
 						}
 					}
