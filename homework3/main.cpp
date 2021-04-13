@@ -10,6 +10,7 @@
 #define PI 3.14159265358979323846
 
 struct Station {
+    int num;
     std::string type_vehicle;
     std::vector<std::string> streets;
     std::vector<std::string> routes;
@@ -40,6 +41,8 @@ public:
         std::string str;
 
         while (data) {
+            str = data.child_value("number");
+            int num = atoi(str.c_str());
             std::vector <std::string> streets;
             std::string loc = data.child_value("location");
             str.clear();
@@ -77,6 +80,7 @@ public:
 
             data = data.next_sibling();
             Station st = {
+                num,
                 data.child_value("type_of_vehicle"),
                 streets,
                 routes,
@@ -132,7 +136,7 @@ public:
 
     void max_dist(std::string type) {
         std::vector<std::string> res_r;
-        std::vector<std::vector<std::pair<double,double>>> res_coord;
+        std::vector<std::vector<int>> res_num;
         for (auto st : stations) {
             if (st.type_vehicle == type) {
                 for (auto r : st.routes) {
@@ -142,37 +146,37 @@ public:
                             index = i;
                     if (index == -1) {
                         res_r.push_back(r);
-                        std::vector<std::pair<double, double>> temp;
-                        temp.push_back(std::make_pair(st.coord1, st.coord2));
-                        res_coord.push_back(temp);
+                        std::vector<int> temp;
+                        temp.push_back(st.num-1);
+                        res_num.push_back(temp);
                     }
                     else
-                        res_coord[index].push_back(std::make_pair(st.coord1, st.coord2));
+                        res_num[index].push_back(st.num-1);
                 }
             }
         }
         std::string ans;
         double max_d = -1;
-        for (size_t i = 0; i < res_coord.size(); ++i) {
-            std::vector<std::vector<double>> distanse(res_coord[i].size());
-            for (int j = 0; j < res_coord[i].size(); j++)
-                distanse[j].assign(res_coord[i].size(), 0);
-            for (int j = 0; j < res_coord[i].size(); ++j) {
-                for (int k = 0; k < res_coord[i].size(); ++k) {
+        for (size_t i = 0; i < res_num.size(); ++i) {
+            std::vector<std::vector<double>> distanse(res_num[i].size());
+            for (int j = 0; j < res_num[i].size(); j++)
+                distanse[j].assign(res_num[i].size(), 0);
+            for (int j = 0; j < res_num[i].size(); ++j) {
+                for (int k = 0; k < res_num[i].size(); ++k) {
                     if(j!=k)
-                    distanse[j][k] = get_dist_km(res_coord[i][j].first, res_coord[i][j].second, res_coord[i][k].first, res_coord[i][k].second);
+                    distanse[j][k] = get_dist_km(stations[res_num[i][j]].coord1, stations[res_num[i][j]].coord2, stations[res_num[i][k]].coord1, stations[res_num[i][k]].coord2);
                 }
             }
 
-            std::vector <double> dist(res_coord[i].size(), 1000000000);
+            std::vector <double> dist(res_num[i].size(), 1000000000);
             dist[0] = 0;
-            std::vector <bool> visited(res_coord[i].size(), 0);
+            std::vector <bool> visited(res_num[i].size(), 0);
             double res = 0;
-            for (int k = 0; k < res_coord[i].size(); ++k)
+            for (int k = 0; k < res_num[i].size(); ++k)
             {
                 double min_dist = 1000000000;
                 int ver = 0;
-                for (int j = 0; j < res_coord[i].size(); ++j)
+                for (int j = 0; j < res_num[i].size(); ++j)
                     if (!visited[j] && dist[j] < min_dist)
                     {
                         min_dist = dist[j];
@@ -180,7 +184,7 @@ public:
                     }
                 res += min_dist;
                 visited[ver] = 1;
-                for (int v = 0; v < res_coord[i].size(); ++v)
+                for (int v = 0; v < res_num[i].size(); ++v)
                     dist[v] = std::min(dist[v], distanse[ver][v]);
             }
             if (res > max_d) {
