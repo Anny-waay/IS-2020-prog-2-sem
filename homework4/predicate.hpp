@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 
 template < class InputIterator, class UnaryPredicate>
 bool allOf(InputIterator first, InputIterator last, const UnaryPredicate& func) {
