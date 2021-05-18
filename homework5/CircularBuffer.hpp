@@ -88,7 +88,7 @@ public:
 	
 	void addLast(T x) {
 		if (size_ == capacity_) {
-			if (tail_ == 1) {
+			if (tail_ == capacity_) {
 				T* dat = new T[capacity_];
 				for (int i = 0; i < size_-1; ++i) {
 					dat[i] = data_[i+1];
@@ -105,7 +105,7 @@ public:
 			data_[size_] = x;
 			++size_;
 		}
-		tail_=1;
+		tail_=size_;
 	}
 
 	void delLast() {
