@@ -107,6 +107,7 @@ public:
 		}
 		--size_;
 		data_[size_] = 0;
+		--tail_;
 	}
 
 	void addFirst(T x) {
@@ -142,6 +143,7 @@ public:
 		delete[] data_;
 		data_ = dat;
 		--size_;
+		--tail_;
 	}
 
 	const T& first() {
