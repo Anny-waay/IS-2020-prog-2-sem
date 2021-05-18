@@ -85,7 +85,7 @@ public:
 	BufferIterator end() const {
 		return BufferIterator(data_ + size_);
 	}
-	
+	//todo O(1)
 	void addLast(T x) {
 		if (size_ == capacity_) {
 			if (tail_ == capacity_) {
@@ -170,6 +170,7 @@ public:
 		return data_[size_ - 1];
 	}
 
+	//todo exception more information
 	T operator[] (int index) const {
 		if (index < 0 || index > size_ - 1) {
 			throw (std::out_of_range("Index is out of range"));
