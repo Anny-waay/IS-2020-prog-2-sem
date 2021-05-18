@@ -10,13 +10,13 @@ private:
 	int size_;
 	int tail_;
 public:
-	explicit CircularBuffer(int capacity) {
-		T* data = new T[capacity];
+	CircularBuffer(int capacity) {
+		data_ = new T[capacity];
 		capacity_ = capacity;
 		size_ = 0;
 		tail_ = 0;
 		for (int i = 0; i < capacity_; ++i) {
-			data[i] = 0;
+			data_[i] = 0;
 		}
 	}
 	~CircularBuffer() {
@@ -41,31 +41,31 @@ public:
 		T& operator*() const { return *iterator; }
 		T* operator->() const { return iterator; }
 		T& operator[](difference_type i) const { return iterator[i]; }
-		BufferIterator& operator ++() { 
-			++iterator; 
+		BufferIterator& operator ++() {
+			++iterator;
 			return *this;
 		}
-		BufferIterator operator++(T) { 
-			BufferIterator temp(*this); 
-			++iterator; 
-			return temp; 
+		BufferIterator operator++(T) {
+			BufferIterator temp(*this);
+			++iterator;
+			return temp;
 		}
-		BufferIterator& operator--() { 
-			--iterator; 
-			return *this; 
+		BufferIterator& operator--() {
+			--iterator;
+			return *this;
 		}
-		BufferIterator operator--(T) { 
-			BufferIterator tmp(*this); 
-			--iterator; 
-			return tmp; 
+		BufferIterator operator--(T) {
+			BufferIterator tmp(*this);
+			--iterator;
+			return tmp;
 		}
 		BufferIterator& operator+=(difference_type it) {
-			iterator += it; 
-			return *this; 
+			iterator += it;
+			return *this;
 		}
 		BufferIterator& operator-=(difference_type it) {
-			iterator -= it; 
-			return *this; 
+			iterator -= it;
+			return *this;
 		}
 		BufferIterator operator+(difference_type it) const { return BufferIterator(iterator + it); }
 		difference_type operator-(const BufferIterator& it) const { return iterator - it.iterator; }
@@ -85,27 +85,20 @@ public:
 	BufferIterator end() const {
 		return BufferIterator(data_ + size_);
 	}
-	//todo O(1)
+
+	//fixed O(1)
 	void addLast(T x) {
+		if (tail_ >= capacity_) {
+			tail_ = 0;
+		}
 		if (size_ == capacity_) {
-			if (tail_ == capacity_) {
-				T* dat = new T[capacity_];
-				for (int i = 0; i < size_-1; ++i) {
-					dat[i] = data_[i+1];
-				}
-				dat[size_-1] = x;
-				delete[] data_;
-				data_ = dat;
-			}
-			else {
-				data_[size_-1] = x;
-			}
+			data_[tail_] = x;
 		}
 		else {
 			data_[size_] = x;
 			++size_;
 		}
-		tail_=size_;
+		++tail_;
 	}
 
 	void delLast() {
@@ -113,22 +106,18 @@ public:
 			throw std::out_of_range("No elements in CircularBuffer");
 		}
 		--size_;
-		data_[size_]=0;
+		data_[size_] = 0;
 	}
 
 	void addFirst(T x) {
 		if (size_ == capacity_) {
-			if (tail_ == 0) {
-				T* dat = new T[size_];
-				dat[0] = x;
-				for (int i = 1; i < size_; ++i) {
-					dat[i] = data_[i - 1];
-				}
-				delete[] data_;
-				data_ = dat;
+			T* dat = new T[size_];
+			dat[0] = x;
+			for (int i = 1; i < size_; ++i) {
+				dat[i] = data_[i - 1];
 			}
-			else
-				data_[0] = x;
+			delete[] data_;
+			data_ = dat;
 		}
 		else {
 			T* dat = new T[capacity_];
@@ -140,7 +129,6 @@ public:
 			data_ = dat;
 			++size_;
 		}
-		tail_ = 0;
 	}
 
 	void delFirst() {
@@ -148,7 +136,7 @@ public:
 			throw std::out_of_range("No elements in CircularBuffer");
 		}
 		T* dat = new T[capacity_];
-		for (int i = 0; i < size_-1; ++i) {
+		for (int i = 0; i < size_ - 1; ++i) {
 			dat[i] = data_[i + 1];
 		}
 		delete[] data_;
@@ -170,16 +158,28 @@ public:
 		return data_[size_ - 1];
 	}
 
-	//todo exception more information
+	//fixed exception more information
 	T operator[] (int index) const {
-		if (index < 0 || index > size_ - 1) {
+		if (size_ == 0) {
+			throw std::out_of_range("No elements in CircularBuffer");
+		}
+		if (index < 0) {
+			throw (std::out_of_range("Incorrect index, index must be >=0"));
+		}
+		if (index > size_ - 1) {
 			throw (std::out_of_range("Index is out of range"));
 		}
 		return data_[index];
 	}
 
 	T& operator[](int index) {
-		if (index < 0 || index > size_ - 1) {
+		if (size_ == 0) {
+			throw std::out_of_range("No elements in CircularBuffer");
+		}
+		if (index < 0) {
+			throw (std::out_of_range("Incorrect index, index must be >=0"));
+		}
+		if (index > size_ - 1) {
 			throw (std::out_of_range("Index is out of range"));
 		}
 		return data_[index];
@@ -196,5 +196,6 @@ public:
 		delete[] data_;
 		data_ = dat;
 		capacity_ = nc;
+		tail_ = size_;
 	}
 };
