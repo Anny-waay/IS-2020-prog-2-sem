@@ -86,7 +86,6 @@ public:
 		return BufferIterator(data_ + size_);
 	}
 
-	//fixed O(1)
 	void addLast(T x) {
 		if (tail_ >= capacity_) {
 			tail_ = 0;
@@ -110,6 +109,7 @@ public:
 		--tail_;
 	}
 
+	//todo O(1)?
 	void addFirst(T x) {
 		if (size_ == capacity_) {
 			T* dat = new T[size_];
@@ -160,7 +160,7 @@ public:
 		return data_[size_ - 1];
 	}
 
-	//fixed exception more information
+	//todo infomation index and size
 	T operator[] (int index) const {
 		if (size_ == 0) {
 			throw std::out_of_range("No elements in CircularBuffer");
