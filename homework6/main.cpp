@@ -1325,7 +1325,7 @@ public:
 
 	void draw() {
 		const double K = 0.65;
-		// корпус - это просто куб черного цвета, размер которого равен K*size
+		// корпус, размер которого равен K*size
 		glPushMatrix();
 		glColor3f(0, 0, 0); //устанавливаем черный (просто черный кубик)
 		glTranslatef(((1.0 - K) / 2) * size + K * size / 2, ((1.0 - K) / 2) * size + K * size / 2, ((1.0 - K) / 2) * size + K * size / 2);
@@ -1584,7 +1584,7 @@ void display() {
 	glTranslatef(CUBE_SIZE / -2.0, CUBE_SIZE / -2.0, CUBE_SIZE / -2.0);
 	cube.draw();
 	glPopMatrix();
-	glutSwapBuffers(); //сущ скрытый буфер, с которым постоянно меняется изображение, в общем тож нада
+	glutSwapBuffers(); //скрытый буфер,  в которым постоянно меняется изображение
 }
 
 void reshape(int w, int h) {
@@ -1704,7 +1704,7 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH); // 1 чтоб не мерцало, 2 используем ржб 3 для 3д 
 	glutInitWindowSize(800, 700); //размер окна
 	glutInitWindowPosition(1, 1); //позиция окна на экране
-	glutCreateWindow("Cube"); //у окна будет такое имя
+	glutCreateWindow("Cube"); //имя окна
 	init(); //задает цвет фона и показывает сам кубик (изначально собранный)
 	glutDisplayFunc(display); //функция рисовния 
 	glutReshapeFunc(reshape); //меняет размеры окна
